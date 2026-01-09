@@ -1,307 +1,362 @@
-import React, { useState } from 'react';
-import { Calculator, TrendingUp, Info, FileText } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nakit Sermaye Artırımı Vergi Avantajı Hesaplayıcı</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); min-height: 100vh; padding: 1.5rem; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .card { background: white; border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); color: white; padding: 2rem; }
+        .header h1 { font-size: 1.875rem; font-weight: bold; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem; }
+        .header p { color: #bfdbfe; font-size: 0.875rem; }
+        .content { padding: 2rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .grid-6 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.5rem; }
+        .form-group input { padding: 0.75rem 1rem; border: 2px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; transition: all 0.2s; }
+        .form-group input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .section-title { font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .btn-calculate { width: 100%; background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); color: white; padding: 1rem; border: none; border-radius: 0.75rem; font-size: 1.125rem; font-weight: bold; cursor: pointer; transition: all 0.2s; margin: 2rem 0; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-calculate:hover { transform: scale(1.02); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .results-container { margin-top: 2rem; }
+        .result-card { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 2px solid #a7f3d0; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .result-title { font-size: 1.25rem; font-weight: bold; color: #1f2937; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .stat-box { background: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .stat-label { font-size: 0.875rem; color: #6b7280; margin-bottom: 0.25rem; }
+        .stat-value { font-size: 1.25rem; font-weight: bold; }
+        .stat-value.gray { color: #374151; }
+        .stat-value.blue { color: #2563eb; }
+        .stat-value.indigo { color: #4f46e5; }
+        .stat-value.purple { color: #7c3aed; }
+        .stat-value.green { color: #059669; }
+        .table-container { background: white; border: 2px solid #e5e7eb; border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .table-info { font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        thead { background: #f3f4f6; }
+        th { padding: 0.75rem 1rem; text-align: left; font-weight: 600; color: #374151; }
+        th.right { text-align: right; }
+        th.center { text-align: center; }
+        td { padding: 0.75rem 1rem; border-top: 1px solid #e5e7eb; }
+        td.right { text-align: right; }
+        td.center { text-align: center; }
+        tbody tr:hover { background: #f9fafb; }
+        tfoot tr { background: #f3f4f6; font-weight: bold; }
+        .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .info-box-content { display: flex; gap: 0.75rem; }
+        .info-box p { font-size: 0.875rem; color: #374151; }
+        .info-box strong { font-weight: 600; display: block; margin-bottom: 0.5rem; }
+        .info-box ul { list-style-position: inside; margin-top: 0.5rem; }
+        .info-box ul li { margin-bottom: 0.25rem; }
+        .warning-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; }
+        .warning-box-content { display: flex; gap: 0.75rem; }
+        .warning-box p { font-size: 0.875rem; color: #374151; }
+        .warning-title { font-weight: bold; color: #dc2626; margin-bottom: 0.25rem; }
+        .footer { text-align: center; margin-top: 1.5rem; color: #6b7280; font-size: 0.875rem; }
+        .footer p { margin-bottom: 0.25rem; }
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .header h1 { font-size: 1.5rem; }
+            .content { padding: 1.5rem; }
+            .table-container { overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
 
-export default function CapitalIncreaseTaxCalculator() {
-  const [year, setYear] = useState(2025);
-  const [interestRate, setInterestRate] = useState(45.34);
-  const [discountRate, setDiscountRate] = useState(50);
-  const [previousYearBalance, setPreviousYearBalance] = useState(0);
-  const [monthlyCapital, setMonthlyCapital] = useState(Array(12).fill(''));
-  const [results, setResults] = useState(null);
+    <script type="text/babel">const { useState } = React;
 
-  const months = [
-    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
-  ];
+        function CapitalIncreaseTaxCalculator() {
+          const [year, setYear] = useState(2025);
+          const [interestRate, setInterestRate] = useState(45.34);
+          const [discountRate, setDiscountRate] = useState(50);
+          const [previousYearBalance, setPreviousYearBalance] = useState(0);
+          const [monthlyCapital, setMonthlyCapital] = useState(Array(12).fill(''));
+          const [results, setResults] = useState(null);
 
-  const formatNumber = (num) => {
-    return new Intl.NumberFormat('tr-TR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(num) + ' TL';
-  };
+          const months = [
+            'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+            'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+          ];
 
-  const formatInputNumber = (value) => {
-    if (!value) return '';
-    const num = parseFloat(value.toString().replace(/\./g, '').replace(',', '.'));
-    if (isNaN(num)) return '';
-    return new Intl.NumberFormat('tr-TR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(num);
-  };
+          const formatNumber = (num) => {
+            return new Intl.NumberFormat('tr-TR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }).format(num) + ' TL';
+          };
 
-  const parseInputNumber = (value) => {
-    if (!value) return 0;
-    return parseFloat(value.toString().replace(/\./g, '').replace(',', '.')) || 0;
-  };
+          const formatInputNumber = (value) => {
+            if (!value) return '';
+            const num = parseFloat(value.toString().replace(/\./g, '').replace(',', '.'));
+            if (isNaN(num)) return '';
+            return new Intl.NumberFormat('tr-TR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }).format(num);
+          };
 
-  const handleMonthlyCapitalChange = (index, value) => {
-    const newMonthlyCapital = [...monthlyCapital];
-    newMonthlyCapital[index] = value;
-    setMonthlyCapital(newMonthlyCapital);
-  };
+          const parseInputNumber = (value) => {
+            if (!value) return 0;
+            return parseFloat(value.toString().replace(/\./g, '').replace(',', '.')) || 0;
+          };
 
-  const calculateTaxAdvantage = () => {
-    let totalCapitalIncrease = 0;
-    let totalDeduction = 0;
-    const monthlyDetails = [];
+          const handleMonthlyCapitalChange = (index, value) => {
+            const newMonthlyCapital = [...monthlyCapital];
+            newMonthlyCapital[index] = value;
+            setMonthlyCapital(newMonthlyCapital);
+          };
 
-    const prevYearAmount = parseInputNumber(previousYearBalance);
-    if (prevYearAmount > 0) {
-      const prevYearDeduction = prevYearAmount * (interestRate / 100) * (discountRate / 100) * (12 / 12);
-      totalDeduction += prevYearDeduction;
-      monthlyDetails.push({
-        month: `Önceki Yıldan Gelen (01.01.${year})`,
-        amount: prevYearAmount,
-        remainingMonths: 12,
-        deduction: prevYearDeduction
-      });
-    }
+          const calculateTaxAdvantage = () => {
+            let totalCapitalIncrease = 0;
+            let totalDeduction = 0;
+            const monthlyDetails = [];
 
-    for (let i = 0; i < 12; i++) {
-      const monthCapital = parseInputNumber(monthlyCapital[i]);
-      if (monthCapital > 0) {
-        totalCapitalIncrease += monthCapital;
-        const remainingMonths = 12 - i;
-        const monthDeduction = monthCapital * (interestRate / 100) * (discountRate / 100) * (remainingMonths / 12);
-        totalDeduction += monthDeduction;
-        
-        monthlyDetails.push({
-          month: `${months[i]} ${year}`,
-          amount: monthCapital,
-          remainingMonths: remainingMonths,
-          deduction: monthDeduction
-        });
-      }
-    }
+            const prevYearAmount = parseInputNumber(previousYearBalance);
+            if (prevYearAmount > 0) {
+              const prevYearDeduction = prevYearAmount * (interestRate / 100) * (discountRate / 100) * (12 / 12);
+              totalDeduction += prevYearDeduction;
+              monthlyDetails.push({
+                month: `Önceki Yıldan Gelen (01.01.${year})`,
+                amount: prevYearAmount,
+                remainingMonths: 12,
+                deduction: prevYearDeduction
+              });
+            }
 
-    const taxAdvantage = totalDeduction * 0.25;
-    const yearEndBalance = prevYearAmount + totalCapitalIncrease;
-    const nextYearsAnnualDeduction = yearEndBalance * (interestRate / 100) * (discountRate / 100);
-    const nextYearsTaxAdvantage = nextYearsAnnualDeduction * 0.25;
-    const fiveYearAdvantage = taxAdvantage + (nextYearsTaxAdvantage * 4);
+            for (let i = 0; i < 12; i++) {
+              const monthCapital = parseInputNumber(monthlyCapital[i]);
+              if (monthCapital > 0) {
+                totalCapitalIncrease += monthCapital;
+                const remainingMonths = 12 - i;
+                const monthDeduction = monthCapital * (interestRate / 100) * (discountRate / 100) * (remainingMonths / 12);
+                totalDeduction += monthDeduction;
+                
+                monthlyDetails.push({
+                  month: `${months[i]} ${year}`,
+                  amount: monthCapital,
+                  remainingMonths: remainingMonths,
+                  deduction: monthDeduction
+                });
+              }
+            }
 
-    setResults({
-      totalCapitalIncrease,
-      previousYearBalance: prevYearAmount,
-      yearEndBalance,
-      totalDeduction,
-      taxAdvantage,
-      fiveYearAdvantage,
-      monthlyDetails,
-      nextYearsAnnualDeduction
-    });
-  };
+            const taxAdvantage = totalDeduction * 0.25;
+            const yearEndBalance = prevYearAmount + totalCapitalIncrease;
+            const nextYearsAnnualDeduction = yearEndBalance * (interestRate / 100) * (discountRate / 100);
+            const nextYearsTaxAdvantage = nextYearsAnnualDeduction * 0.25;
+            const fiveYearAdvantage = taxAdvantage + (nextYearsTaxAdvantage * 4);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white">
-            <div className="flex items-center gap-3 mb-2">
-              <Calculator className="w-10 h-10" />
-              <h1 className="text-3xl font-bold">Nakit Sermaye Artırımı Vergi Avantajı Hesaplayıcı</h1>
-            </div>
-            <p className="text-blue-100 text-sm">Kurumlar Vergisi Kanunu m.10/1-ı - Kıst Dönem Hesaplama Yöntemi</p>
-          </div>
+            setResults({
+              totalCapitalIncrease,
+              previousYearBalance: prevYearAmount,
+              yearEndBalance,
+              totalDeduction,
+              taxAdvantage,
+              fiveYearAdvantage,
+              monthlyDetails,
+              nextYearsAnnualDeduction
+            });
+          };
 
-          <div className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Hesaplama Yılı</label>
-                <input
-                  type="number"
-                  value={year}
-                  onChange={(e) => setYear(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Önceki Yıldan Gelen (01.01.{year})</label>
-                <input
-                  type="text"
-                  value={previousYearBalance}
-                  onChange={(e) => setPreviousYearBalance(e.target.value)}
-                  onBlur={(e) => setPreviousYearBalance(formatInputNumber(e.target.value))}
-                  placeholder="0,00"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Ticari Kredi Faiz Oranı (%)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={interestRate}
-                  onChange={(e) => setInterestRate(parseFloat(e.target.value))}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">İndirim Oranı (%)</label>
-                <input
-                  type="number"
-                  value={discountRate}
-                  onChange={(e) => setDiscountRate(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
-                Aylık Nakit Sermaye Artırımları (TL)
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {months.map((month, index) => (
-                  <div key={index}>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">{month} {year}</label>
-                    <input
-                      type="text"
-                      value={monthlyCapital[index]}
-                      onChange={(e) => handleMonthlyCapitalChange(index, e.target.value)}
-                      onBlur={(e) => handleMonthlyCapitalChange(index, formatInputNumber(e.target.value))}
-                      placeholder="0,00"
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <button
-              onClick={calculateTaxAdvantage}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200"
-            >
-              <Calculator className="inline-block w-6 h-6 mr-2" />
-              Hesapla
-            </button>
-
-            {results && (
-              <div className="mt-8 space-y-6">
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200">
-                  <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <FileText className="w-6 h-6" />
-                    {year} Yılı Hesaplama Sonuçları
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-white p-4 rounded-lg shadow">
-                      <p className="text-sm text-gray-600 mb-1">Önceki Yıldan Gelen</p>
-                      <p className="text-xl font-bold text-gray-700">{formatNumber(results.previousYearBalance)}</p>
-                    </div>
-
-                    <div className="bg-white p-4 rounded-lg shadow">
-                      <p className="text-sm text-gray-600 mb-1">{year} Yılı Nakit Artış</p>
-                      <p className="text-xl font-bold text-blue-600">{formatNumber(results.totalCapitalIncrease)}</p>
-                    </div>
-
-                    <div className="bg-white p-4 rounded-lg shadow">
-                      <p className="text-sm text-gray-600 mb-1">Yıl Sonu Toplam Sermaye</p>
-                      <p className="text-xl font-bold text-indigo-600">{formatNumber(results.yearEndBalance)}</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-white p-4 rounded-lg shadow mb-6">
-                    <p className="text-sm text-gray-600 mb-1">Toplam İndirim Tutarı (Kıst Dönem)</p>
-                    <p className="text-2xl font-bold text-purple-600">{formatNumber(results.totalDeduction)}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Hesaplama: Nakdi sermaye × %{interestRate} × %{discountRate} × (Kalan Ay / 12)
-                    </p>
-                  </div>
+          return (
+            <div className="container">
+              <div className="card">
+                <div className="header">
+                  <h1>
+                    <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    Nakit Sermaye Artırımı Vergi Avantajı Hesaplayıcı
+                  </h1>
+                  <p>Kurumlar Vergisi Kanunu m.10/1-ı - Kıst Dönem Hesaplama Yöntemi</p>
                 </div>
 
-                {results.monthlyDetails.length > 0 && (
-                  <div className="bg-white rounded-xl p-6 border-2 border-gray-200">
-                    <h3 className="text-lg font-bold text-gray-800 mb-4">Aylık Hesaplama Detayları</h3>
-                    
-                    <div className="mb-4 text-sm text-gray-600">
-                      <p><strong>Hesaplama Yılı:</strong> {year}</p>
-                      <p><strong>Ticari Kredi Faiz Oranı:</strong> %{interestRate}</p>
-                      <p><strong>İndirim Oranı:</strong> %{discountRate}</p>
+                <div className="content">
+                  <div className="grid-4">
+                    <div className="form-group">
+                      <label>Hesaplama Yılı</label>
+                      <input type="number" value={year} onChange={(e) => setYear(parseInt(e.target.value))} />
                     </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-100">
-                          <tr>
-                            <th className="px-4 py-3 text-left font-semibold text-gray-700">Dönem</th>
-                            <th className="px-4 py-3 text-right font-semibold text-gray-700">Tutar</th>
-                            <th className="px-4 py-3 text-center font-semibold text-gray-700">Kalan Ay</th>
-                            <th className="px-4 py-3 text-right font-semibold text-gray-700">İndirim Tutarı</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                          {results.monthlyDetails.map((detail, index) => (
-                            <tr key={index} className="hover:bg-gray-50">
-                              <td className="px-4 py-3 text-gray-700">{detail.month}</td>
-                              <td className="px-4 py-3 text-right font-medium text-blue-600">
-                                {formatNumber(detail.amount)}
-                              </td>
-                              <td className="px-4 py-3 text-center text-gray-600">
-                                {detail.remainingMonths} ay
-                              </td>
-                              <td className="px-4 py-3 text-right font-medium text-green-600">
-                                {formatNumber(detail.deduction)}
-                              </td>
-                            </tr>
-                          ))}
-                          <tr className="bg-gray-100 font-bold">
-                            <td className="px-4 py-3 text-gray-800">TOPLAM</td>
-                            <td className="px-4 py-3 text-right text-blue-700">
-                              {formatNumber(results.yearEndBalance)}
-                            </td>
-                            <td className="px-4 py-3"></td>
-                            <td className="px-4 py-3 text-right text-green-700">
-                              {formatNumber(results.totalDeduction)}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
 
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-                  <div className="flex items-start gap-3">
-                    <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-gray-700">
-                      <p className="font-semibold mb-2">Hesaplama Yöntemi:</p>
-                      <ul className="list-disc list-inside space-y-1">
-                        <li>Her ödeme için, <strong>ödemenin yapıldığı ay dahil</strong> yıl sonuna kadar kalan ay sayısı dikkate alınır.</li>
-                        <li>Formül: İndirim = Nakdi Sermaye × Faiz Oranı × İndirim Oranı × (Kalan Ay / 12)</li>
-                        <li>Önceki yıldan gelen sermaye için tam yıl (12/12) hesaplanır.</li>
-                        <li>İndirim hakkı sermaye artırımının yapıldığı yıl dahil 5 yıl süreyle kullanılabilir.</li>
-                        <li>Sonraki yıllarda tam yıl (12/12) üzerinden hesaplama yapılır.</li>
-                        <li>Yeterli kurum kazancı yoksa, indirim tutarı sonraki yıllara devreder.</li>
-                      </ul>
+                    <div className="form-group">
+                      <label>Önceki Yıldan Gelen (01.01.{year})</label>
+                      <input type="text" value={previousYearBalance} onChange={(e) => setPreviousYearBalance(e.target.value)} onBlur={(e) => setPreviousYearBalance(formatInputNumber(e.target.value))} placeholder="0,00" />
                     </div>
-                  </div>
-                </div>
 
-                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded mt-4">
-                  <div className="flex items-start gap-3">
-                    <Info className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-gray-700">
-                      <p className="font-bold text-red-700 mb-1">⚠️ ÖNEMLİ HATIRLATMA:</p>
-                      <p className="font-semibold">Sermaye ödeme makbuzlarını Kurumlar Vergisi Beyannamesine eklemeyi unutmayınız!</p>
+                    <div className="form-group">
+                      <label>Ticari Kredi Faiz Oranı (%)</label>
+                      <input type="number" step="0.01" value={interestRate} onChange={(e) => setInterestRate(parseFloat(e.target.value))} />
+                    </div>
+
+                    <div className="form-group">
+                      <label>İndirim Oranı (%)</label>
+                      <input type="number" value={discountRate} onChange={(e) => setDiscountRate(parseInt(e.target.value))} />
                     </div>
                   </div>
+
+                  <div style={{marginBottom: '2rem'}}>
+                    <h2 className="section-title">
+                      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                      Aylık Nakit Sermaye Artırımları (TL)
+                    </h2>
+                    <div className="grid-6">
+                      {months.map((month, index) => (
+                        <div key={index} className="form-group">
+                          <label>{month} {year}</label>
+                          <input type="text" value={monthlyCapital[index]} onChange={(e) => handleMonthlyCapitalChange(index, e.target.value)} onBlur={(e) => handleMonthlyCapitalChange(index, formatInputNumber(e.target.value))} placeholder="0,00" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button onClick={calculateTaxAdvantage} className="btn-calculate">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    Hesapla
+                  </button>
+
+                  {results && (
+                    <div className="results-container">
+                      <div className="result-card">
+                        <h3 className="result-title">
+                          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          {year} Yılı Hesaplama Sonuçları
+                        </h3>
+                        
+                        <div className="grid-3">
+                          <div className="stat-box">
+                            <p className="stat-label">Önceki Yıldan Gelen</p>
+                            <p className="stat-value gray">{formatNumber(results.previousYearBalance)}</p>
+                          </div>
+
+                          <div className="stat-box">
+                            <p className="stat-label">{year} Yılı Nakit Artış</p>
+                            <p className="stat-value blue">{formatNumber(results.totalCapitalIncrease)}</p>
+                          </div>
+
+                          <div className="stat-box">
+                            <p className="stat-label">Yıl Sonu Toplam Sermaye</p>
+                            <p className="stat-value indigo">{formatNumber(results.yearEndBalance)}</p>
+                          </div>
+                        </div>
+
+                        <div className="stat-box">
+                          <p className="stat-label">Toplam İndirim Tutarı (Kıst Dönem)</p>
+                          <p className="stat-value purple" style={{fontSize: '1.5rem'}}>{formatNumber(results.totalDeduction)}</p>
+                          <p style={{fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem'}}>
+                            Hesaplama: Nakdi sermaye × %{interestRate} × %{discountRate} × (Kalan Ay / 12)
+                          </p>
+                        </div>
+                      </div>
+
+                      {results.monthlyDetails.length > 0 && (
+                        <div className="table-container">
+                          <h3 className="result-title">Aylık Hesaplama Detayları</h3>
+                          
+                          <div className="table-info">
+                            <p><strong>Hesaplama Yılı:</strong> {year}</p>
+                            <p><strong>Ticari Kredi Faiz Oranı:</strong> %{interestRate}</p>
+                            <p><strong>İndirim Oranı:</strong> %{discountRate}</p>
+                          </div>
+
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>Dönem</th>
+                                <th className="right">Tutar</th>
+                                <th className="center">Kalan Ay</th>
+                                <th className="right">İndirim Tutarı</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {results.monthlyDetails.map((detail, index) => (
+                                <tr key={index}>
+                                  <td>{detail.month}</td>
+                                  <td className="right" style={{color: '#2563eb', fontWeight: 500}}>
+                                    {formatNumber(detail.amount)}
+                                  </td>
+                                  <td className="center">
+                                    {detail.remainingMonths} ay
+                                  </td>
+                                  <td className="right" style={{color: '#059669', fontWeight: 500}}>
+                                    {formatNumber(detail.deduction)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            <tfoot>
+                              <tr>
+                                <td>TOPLAM</td>
+                                <td className="right" style={{color: '#1d4ed8'}}>
+                                  {formatNumber(results.yearEndBalance)}
+                                </td>
+                                <td></td>
+                                <td className="right" style={{color: '#047857'}}>
+                                  {formatNumber(results.totalDeduction)}
+                                </td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      )}<div className="info-box">
+                        <div className="info-box-content">
+                          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{flexShrink: 0, marginTop: '2px'}}>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <div>
+                            <strong>Hesaplama Yöntemi:</strong>
+                            <ul>
+                              <li>Her ödeme için, <strong>ödemenin yapıldığı ay dahil</strong> yıl sonuna kadar kalan ay sayısı dikkate alınır.</li>
+                              <li>Formül: İndirim = Nakdi Sermaye × Faiz Oranı × İndirim Oranı × (Kalan Ay / 12)</li>
+                              <li>Önceki yıldan gelen sermaye için tam yıl (12/12) hesaplanır.</li>
+                              <li>İndirim hakkı sermaye artırımının yapıldığı yıl dahil 5 yıl süreyle kullanılabilir.</li>
+                              <li>Sonraki yıllarda tam yıl (12/12) üzerinden hesaplama yapılır.</li>
+                              <li>Yeterli kurum kazancı yoksa, indirim tutarı sonraki yıllara devreder.</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="warning-box">
+                        <div className="warning-box-content">
+                          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{flexShrink: 0, marginTop: '2px', color: '#dc2626'}}>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <div>
+                            <p className="warning-title">⚠️ ÖNEMLİ HATIRLATMA:</p>
+                            <p><strong>Sermaye ödeme makbuzlarını Kurumlar Vergisi Beyannamesine eklemeyi unutmayınız!</strong></p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-        </div>
 
-        <div className="text-center mt-6 text-gray-600 text-sm">
-          <p>© {new Date().getFullYear()} - Nakit Sermaye Artırımı Vergi Avantajı Hesaplayıcı</p>
-          <p className="mt-1">Kurumlar Vergisi Kanunu m.10/1-ı kapsamında</p>
-        </div>
-      </div>
-    </div>
-  );
-}
+              <div className="footer">
+                <p>© {new Date().getFullYear()} - Nakit Sermaye Artırımı Vergi Avantajı Hesaplayıcı</p>
+                <p>Kurumlar Vergisi Kanunu m.10/1-ı kapsamında</p>
+              </div>
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<CapitalIncreaseTaxCalculator />);
+    </script>
+</body>
+</html>
